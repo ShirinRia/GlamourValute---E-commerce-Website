@@ -10,7 +10,7 @@ var app = express()
 
 app.use(cors())
 app.use(express.json())
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 5000
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
@@ -34,7 +34,8 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     const productcollection = client.db("product").collection("productdata");
-   
+    const usercollection = client.db("product").collection("userdata");
+    const cartcollection = client.db("product").collection("cartdata");
     // get all data from database
     app.get('/products', async (req, res) => {
       const cursor = productcollection.find();
@@ -71,8 +72,14 @@ async function run() {
       const result = await productcollection.insertOne(products);
       res.send(result)
     })
+    // add new user to database
+    app.post('/users', async (req, res) => {
+      const user = req.body
+      console.log(user)
+      const result = await usercollection.insertOne(user);
+      res.send(result)
+    })
    
-
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({
