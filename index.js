@@ -33,7 +33,23 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     const productcollection = client.db("product").collection("productdata");
-    
+    // get all data from database
+    app.get('/products', async (req, res) => {
+      const cursor = productcollection.find();
+      const result = await cursor.toArray();
+      res.send(result)
+    })
+    // get specific brand data from mongodb
+    app.get('/products/:brand', async (req, res) => {
+      const brand = req.params.brand
+      console.log(brand)
+      const query = {
+        BrandName: brand
+      }
+      const cursor = await productcollection.find(query)
+      const result = await cursor.toArray();
+      res.send(result)
+    })
     // add new product to database
     app.post('/products', async (req, res) => {
       const products = req.body
