@@ -1,6 +1,7 @@
 const {
   MongoClient,
-  ServerApiVersion
+  ServerApiVersion,
+  ObjectId
 } = require('mongodb');
 const express = require('express')
 var cors = require('cors')
@@ -9,7 +10,7 @@ var app = express()
 
 app.use(cors())
 app.use(express.json())
-const port = process.env.PORT || 5000
+const port = process.env.PORT || 3000
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
@@ -33,6 +34,7 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     const productcollection = client.db("product").collection("productdata");
+   
     // get all data from database
     app.get('/products', async (req, res) => {
       const cursor = productcollection.find();
@@ -50,6 +52,18 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result)
     })
+    // get specific id data from mongodb
+    app.get("/products/:brand/:id", async (req, res) => {
+      const brand=req.params.brand
+      const id = req.params.id
+      const query = {
+        BrandName: brand,
+        _id: new ObjectId(id)
+      }
+      const result = await productcollection.findOne(query)
+      // const result = await cursor.toArray();
+      res.send(result)
+    })
     // add new product to database
     app.post('/products', async (req, res) => {
       const products = req.body
@@ -57,6 +71,7 @@ async function run() {
       const result = await productcollection.insertOne(products);
       res.send(result)
     })
+   
 
 
     // Send a ping to confirm a successful connection
