@@ -55,7 +55,7 @@ async function run() {
     })
     // get specific id data from mongodb
     app.get("/products/:brand/:id", async (req, res) => {
-      const brand=req.params.brand
+      const brand = req.params.brand
       const id = req.params.id
       const query = {
         BrandName: brand,
@@ -79,8 +79,24 @@ async function run() {
       const result = await usercollection.insertOne(user);
       res.send(result)
     })
-   
 
+    // update userdata
+    app.patch('/users', async (req, res) => {
+
+      const user = req.body
+      const query = {
+        email: user.email
+      }
+     
+      const updateuserdb = {
+        $set: {
+          lastloggedat: user.lastloggedat
+        },
+      };
+      // Update the first document that matches the filter
+      const result = await usercollection.updateOne(query, updateuserdb);
+      res.send(result)
+    })
     // Send a ping to confirm a successful connection
     await client.db("admin").command({
       ping: 1
