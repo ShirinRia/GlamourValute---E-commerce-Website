@@ -79,6 +79,13 @@ async function run() {
       const result = await usercollection.insertOne(user);
       res.send(result)
     })
+    // add cart to database
+    app.post('/carts', async (req, res) => {
+      const cartProduct = req.body
+      console.log(cartProduct)
+      const result = await cartcollection.insertOne(cartProduct);
+      res.send(result)
+    })
 
     // update userdata
     app.patch('/users', async (req, res) => {
