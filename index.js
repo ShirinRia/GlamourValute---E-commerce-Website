@@ -62,7 +62,7 @@ async function run() {
         _id: new ObjectId(id)
       }
       const result = await productcollection.findOne(query)
-      
+
       res.send(result)
     })
     // get cart data for a user from mongodb
@@ -105,7 +105,7 @@ async function run() {
       const query = {
         email: user.email
       }
-     
+
       const updateuserdb = {
         $set: {
           lastloggedat: user.lastloggedat
@@ -115,10 +115,45 @@ async function run() {
       const result = await usercollection.updateOne(query, updateuserdb);
       res.send(result)
     })
-// delete data from cart
+    // update product data
+    app.put('/products/:BrandName/:id', async (req, res) => {
+
+      const id = req.params.id
+      const brand = req.params.BrandName
+      const query = {
+        BrandName: brand,
+        _id: new ObjectId(id)
+      }
+      /* Set the upsert option to insert a document if no documents match the filter */
+      const options = {
+        upsert: true
+      };
+      // Specify the update to set a value for the plot field
+      const updateproduct = req.body
+      console.log(updateproduct)
+      const updateproductdoc = {
+        $set: {
+          product_name:updateproduct.product_name,
+          BrandName:updateproduct.BrandName,
+          product_type :updateproduct.product_type,
+          product_price :updateproduct.product_price,
+          product_rating:updateproduct.product_rating,
+          product_description :updateproduct.product_description,
+          product_photo:updateproduct.product_photo,
+          product_amount:updateproduct.product_amount
+        
+        },
+      };
+
+      // Update the first document that matches the filter
+      const result = await productcollection.updateOne(query, updateproductdoc, options);
+      res.send(result)
+    })
+
+    // delete data from cart
     app.delete('/carts/:id', async (req, res) => {
       const id = req.params.id
-      console.log('cartid',id)
+      console.log('cartid', id)
       const query = {
         _id: id
       }
