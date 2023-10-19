@@ -62,7 +62,18 @@ async function run() {
         _id: new ObjectId(id)
       }
       const result = await productcollection.findOne(query)
-      // const result = await cursor.toArray();
+      
+      res.send(result)
+    })
+    // get cart data for a user from mongodb
+    app.get('/carts/:uid', async (req, res) => {
+      const uid = req.params.uid
+      console.log(uid)
+      const query = {
+        UserUid: uid
+      }
+      const cursor = await cartcollection.find(query)
+      const result = await cursor.toArray();
       res.send(result)
     })
     // add new product to database
@@ -102,6 +113,16 @@ async function run() {
       };
       // Update the first document that matches the filter
       const result = await usercollection.updateOne(query, updateuserdb);
+      res.send(result)
+    })
+// delete data from cart
+    app.delete('/carts/:id', async (req, res) => {
+      const id = req.params.id
+      console.log('cartid',id)
+      const query = {
+        _id: id
+      }
+      const result = await cartcollection.deleteOne(query)
       res.send(result)
     })
     // Send a ping to confirm a successful connection
