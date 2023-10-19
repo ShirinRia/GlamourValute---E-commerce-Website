@@ -36,6 +36,7 @@ async function run() {
     const productcollection = client.db("product").collection("productdata");
     const usercollection = client.db("product").collection("userdata");
     const cartcollection = client.db("product").collection("cartdata");
+    const reviewcollection = client.db("product").collection("reviewdata");
     // get all data from database
     app.get('/products', async (req, res) => {
       const cursor = productcollection.find();
@@ -81,6 +82,13 @@ async function run() {
       const products = req.body
       console.log(products)
       const result = await productcollection.insertOne(products);
+      res.send(result)
+    })
+     // add new review to database
+     app.post('/reviews', async (req, res) => {
+      const reviews = req.body
+      console.log(reviews)
+      const result = await reviewcollection.insertOne(reviews);
       res.send(result)
     })
     // add new user to database
