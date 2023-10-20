@@ -32,7 +32,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     const productcollection = client.db("product").collection("productdata");
     const usercollection = client.db("product").collection("userdata");
     const cartcollection = client.db("product").collection("cartdata");
@@ -96,8 +96,8 @@ async function run() {
       const uid = req.params.uid
       console.log(uid)
       const query = {
-        // UserUid: uid
-        _id:uid
+        UserUid: uid
+        // _id:uid
       }
       const cursor = await cartcollection.find(query)
       const result = await cursor.toArray();
