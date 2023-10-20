@@ -37,9 +37,16 @@ async function run() {
     const usercollection = client.db("product").collection("userdata");
     const cartcollection = client.db("product").collection("cartdata");
     const reviewcollection = client.db("product").collection("reviewdata");
+    const advertisecollection = client.db("product").collection("advertisedata");
     // get all data from database
     app.get('/products', async (req, res) => {
       const cursor = productcollection.find();
+      const result = await cursor.toArray();
+      res.send(result)
+    })
+     // get all data from database
+    app.get('/reviews', async (req, res) => {
+      const cursor = reviewcollection.find();
       const result = await cursor.toArray();
       res.send(result)
     })
@@ -51,6 +58,24 @@ async function run() {
         BrandName: brand
       }
       const cursor = await productcollection.find(query)
+      const result = await cursor.toArray();
+      res.send(result)
+    })
+     // get all advertises from database
+     app.get('/advertises', async (req, res) => {
+      const cursor = advertisecollection.find();
+      const result = await cursor.toArray();
+      res.send(result)
+    })
+    
+    // get specific brand advertise from mongodb
+    app.get('/advertises/:brand', async (req, res) => {
+      const brand = req.params.brand
+      console.log(brand)
+      const query = {
+        BrandName: brand
+      }
+      const cursor = await advertisecollection.find(query)
       const result = await cursor.toArray();
       res.send(result)
     })
@@ -71,7 +96,8 @@ async function run() {
       const uid = req.params.uid
       console.log(uid)
       const query = {
-        UserUid: uid
+        // UserUid: uid
+        _id:uid
       }
       const cursor = await cartcollection.find(query)
       const result = await cursor.toArray();
@@ -103,6 +129,13 @@ async function run() {
       const cartProduct = req.body
       console.log(cartProduct)
       const result = await cartcollection.insertOne(cartProduct);
+      res.send(result)
+    })
+    // add advertise to database
+    app.post('/advertises', async (req, res) => {
+      const advertises = req.body
+      console.log(advertises)
+      const result = await advertisecollection.insertOne(advertises);
       res.send(result)
     })
 
@@ -169,10 +202,10 @@ async function run() {
       res.send(result)
     })
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({
-      ping: 1
-    });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    // await client.db("admin").command({
+    //   ping: 1
+    // });
+    // console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
