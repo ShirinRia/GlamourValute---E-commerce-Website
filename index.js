@@ -1,3 +1,4 @@
+var jwt = require('jsonwebtoken');
 const {
   MongoClient,
   ServerApiVersion,
@@ -5,10 +6,27 @@ const {
 } = require('mongodb');
 const express = require('express')
 var cors = require('cors')
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 require('dotenv').config()
+
+const formData = require('form-data');
+const Mailgun = require('mailgun.js');
+const mailgun = new Mailgun(formData);
+const mg = mailgun.client({
+	username: 'api',
+	key: '<PRIVATE_API_KEY>',
+});
+
 var app = express()
 
-app.use(cors())
+// app.use(cors())
+app.use(cors({
+  origin: ['http://localhost:5173'],
+  credentials: true
+
+}
+
+))
 app.use(express.json())
 const port = process.env.PORT || 5000
 
@@ -38,6 +56,15 @@ async function run() {
     const cartcollection = client.db("product").collection("cartdata");
     const reviewcollection = client.db("product").collection("reviewdata");
     const advertisecollection = client.db("product").collection("advertisedata");
+    const payment_class_information_collection = client.db("product").collection("payment_class_data");
+    
+
+    app.post('/jwt',async(req,res)=>{
+      const user=req.body;
+      const token=jwt.sign(user,'secret',{expiresIn:'1h'})
+      res.send(token)
+    })
+
     // get all data from database
     app.get('/products', async (req, res) => {
       const cursor = productcollection.find();
@@ -67,7 +94,31 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result)
     })
-    
+    // paymnet
+    app.post('/payments', async (req, res) => {
+      const payment = req.body
+      console.log(payment)
+      const result = await payment_class_information_collection.insertOne(payment);
+      res.send(result)
+    })
+    // payment intent
+    app.post('/create-payment-intent', async (req, res) => {
+      const {
+        price
+      } = req.body;
+      const amount = parseInt(price * 100);
+      console.log(amount, 'amount inside the intent')
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: 'usd',
+        payment_method_types: ['card']
+      });
+
+      res.send({
+        clientSecret: paymentIntent.client_secret
+      })
+    });
     // get specific brand advertise from mongodb
     app.get('/advertises/:brand', async (req, res) => {
       const brand = req.params.brand
@@ -102,6 +153,17 @@ async function run() {
       const cursor = await cartcollection.find(query)
       const result = await cursor.toArray();
       res.send(result)
+    })
+    // get class from database
+    app.get('/carts/:uid/:id', async (req, res) => {
+      const id = req.params.id;
+      const uid = req.params.uid;
+      const query = {
+        UserUid: uid,
+        _id: new ObjectId(id)
+      }
+      const result = await cartcollection.findOne(query);
+      res.send(result);
     })
     // add new product to database
     app.post('/products', async (req, res) => {
